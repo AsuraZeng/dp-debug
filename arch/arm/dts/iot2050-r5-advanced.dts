@@ -10,17 +10,16 @@
 #include "k3-am654-ddr.dtsi"
 
 / {
-	compatible =  "ti,am654-evm", "ti,am654";
-	model = "Texas Instruments AM654 R5 Base Board";
+	compatible =  "siemens,iot2050", "ti,am654";
+	model = "Siemens IOT2050 R5 Advanced Base Board";
 
 	aliases {
-		serial0 = &wkup_uart0;
 		serial1 = &mcu_uart0;
 		serial2 = &main_uart0;
 	};
 
 	chosen {
-		stdout-path = "serial2:115200n8";
+		stdout-path = "serial3:115200n8";
 		tick-timer = &timer1;
 	};
 
@@ -104,12 +103,12 @@
 	ti,secure-host;
 };
 
-&wkup_uart0 {
-	u-boot,dm-spl;
-	pinctrl-names = "default";
-	pinctrl-0 = <&wkup_uart0_pins_default>;
-	status = "okay";
-};
+// &wkup_uart0 {
+// 	u-boot,dm-spl;
+// 	pinctrl-names = "default";
+// 	pinctrl-0 = <&wkup_uart0_pins_default>;
+// 	status = "okay";
+// };
 
 &mcu_uart0 {
 	u-boot,dm-spl;
@@ -121,10 +120,35 @@
 };
 
 &main_uart0 {
+	// pinctrl-names = "default";
+	// pinctrl-0 = <&main_uart0_pins_default>;
+	// power-domains = <&k3_pds 146 TI_SCI_PD_SHARED>;
+	// status = "okay";
+	status = "disabled";
+};
+
+&main_i2c0 {
+	u-boot,dm-spl;
 	pinctrl-names = "default";
-	pinctrl-0 = <&main_uart0_pins_default>;
-	power-domains = <&k3_pds 146 TI_SCI_PD_SHARED>;
+	pinctrl-0 = <&main_i2c0_pins_default>;
 	status = "okay";
+	clock-frequency = <400000>;
+	power-domains = <&k3_pds 110 TI_SCI_PD_SHARED>;
+	eeprom@54 {
+		compatible = "atmel,24c08";
+		reg = <0x54>;
+		pagesize = <16>;
+	};
+};
+&main_pmx1 {
+	u-boot,dm-spl;
+	main_i2c0_pins_default: main_i2c0_pins_default {
+		pinctrl-single,pins = <
+			AM65X_IOPAD(0x0000, PIN_INPUT, 0) /* (D20) I2C0_SCL */
+			AM65X_IOPAD(0x0004, PIN_INPUT, 0) /* (C21) I2C0_SDA */
+		>;
+		u-boot,dm-spl;
+	};
 };
 
 &wkup_vtm0 {
@@ -136,19 +160,19 @@
 
 &wkup_pmx0 {
 	u-boot,dm-spl;
-	wkup_uart0_pins_default: wkup_uart0_pins_default {
-		pinctrl-single,pins = <
-			AM65X_WKUP_IOPAD(0x00a0, PIN_INPUT, 0)	/* (AB1) WKUP_UART0_RXD */
-			AM65X_WKUP_IOPAD(0x00a4, PIN_OUTPUT, 0)	/* (AB5) WKUP_UART0_TXD */
-			AM65X_WKUP_IOPAD(0x00c8, PIN_INPUT, 1)	/* (AC2) WKUP_GPIO0_6.WKUP_UART0_CTSn */
-			AM65X_WKUP_IOPAD(0x00cc, PIN_OUTPUT, 1)	/* (AC1) WKUP_GPIO0_7.WKUP_UART0_RTSn */
-		>;
-		u-boot,dm-spl;
-	};
+	// wkup_uart0_pins_default: wkup_uart0_pins_default {
+	// 	pinctrl-single,pins = <
+	// 		AM65X_WKUP_IOPAD(0x00a0, PIN_INPUT, 0)	/* (AB1) WKUP_UART0_RXD */
+	// 		AM65X_WKUP_IOPAD(0x00a4, PIN_OUTPUT, 0)	/* (AB5) WKUP_UART0_TXD */
+	// 		AM65X_WKUP_IOPAD(0x00c8, PIN_INPUT, 1)	/* (AC2) WKUP_GPIO0_6.WKUP_UART0_CTSn */
+	// 		AM65X_WKUP_IOPAD(0x00cc, PIN_OUTPUT, 1)	/* (AC1) WKUP_GPIO0_7.WKUP_UART0_RTSn */
+	// 	>;
+	// 	u-boot,dm-spl;
+	// };
 
 	wkup_vtt_pins_default: wkup_vtt_pins_default {
 		pinctrl-single,pins = <
-			AM65X_WKUP_IOPAD(0x0040, PIN_OUTPUT_PULLUP, 7)	/* WKUP_GPIO0_28 */
+			AM65X_WKUP_IOPAD(0x0018, PIN_OUTPUT_PULLUP, 7)	/* WKUP_GPIO0_18 */
 		>;
 		u-boot,dm-spl;
 	};
@@ -168,8 +192,15 @@
 			AM65X_WKUP_IOPAD(0x00e0, PIN_INPUT, 0) /* (AC7) WKUP_I2C0_SCL */
 			AM65X_WKUP_IOPAD(0x00e4, PIN_INPUT, 0) /* (AD6) WKUP_I2C0_SDA */
 		>;
+		u-boot,dm-spl;
 	};
-
+	mcu_i2c0_pins_default: mcu_i2c0_pins_default {
+		pinctrl-single,pins = <
+			AM65X_WKUP_IOPAD(0x00e8, PIN_INPUT, 0) /* (AD8) MCU_I2C0_SCL */
+			AM65X_WKUP_IOPAD(0x00ec, PIN_INPUT, 0) /* (AD7) MCU_I2C0_SDA */
+		>;
+		u-boot,dm-spl;
+	};
 	mcu_fss0_ospi0_pins_default: mcu-fss0-ospi0-pins_default {
 		pinctrl-single,pins = <
 			AM65X_WKUP_IOPAD(0x0000, PIN_OUTPUT, 0) /* (V1) MCU_OSPI0_CLK */
@@ -178,20 +209,21 @@
 			AM65X_WKUP_IOPAD(0x0010, PIN_INPUT, 0)  /* (U5) MCU_OSPI0_D1 */
 			AM65X_WKUP_IOPAD(0x002c, PIN_OUTPUT, 0) /* (R4) MCU_OSPI0_CSn0 */
 		>;
+		u-boot,dm-spl;
 	};
 };
 
 &main_pmx0 {
 	u-boot,dm-spl;
-	main_uart0_pins_default: main-uart0-pins-default {
-		pinctrl-single,pins = <
-			AM65X_IOPAD(0x01e4, PIN_INPUT, 0)	/* (AF11) UART0_RXD */
-			AM65X_IOPAD(0x01e8, PIN_OUTPUT, 0)	/* (AE11) UART0_TXD */
-			AM65X_IOPAD(0x01ec, PIN_INPUT, 0)	/* (AG11) UART0_CTSn */
-			AM65X_IOPAD(0x01f0, PIN_OUTPUT, 0)	/* (AD11) UART0_RTSn */
-		>;
-		u-boot,dm-spl;
-	};
+	// main_uart0_pins_default: main-uart0-pins-default {
+	// 	pinctrl-single,pins = <
+	// 		AM65X_IOPAD(0x01e4, PIN_INPUT, 0)	/* (AF11) UART0_RXD */
+	// 		AM65X_IOPAD(0x01e8, PIN_OUTPUT, 0)	/* (AE11) UART0_TXD */
+	// 		AM65X_IOPAD(0x01ec, PIN_INPUT, 0)	/* (AG11) UART0_CTSn */
+	// 		AM65X_IOPAD(0x01f0, PIN_OUTPUT, 0)	/* (AD11) UART0_RTSn */
+	// 	>;
+	// 	u-boot,dm-spl;
+	// };
 
 	main_mmc0_pins_default: main_mmc0_pins_default {
 		pinctrl-single,pins = <
@@ -210,19 +242,19 @@
 		u-boot,dm-spl;
 	};
 
-	main_mmc1_pins_default: main_mmc1_pins_default {
-		pinctrl-single,pins = <
-			AM65X_IOPAD(0x02d4, PIN_INPUT_PULLDOWN, 0)	/* (C27) MMC1_CLK */
-			AM65X_IOPAD(0x02d8, PIN_INPUT_PULLUP, 0)	/* (C28) MMC1_CMD */
-			AM65X_IOPAD(0x02d0, PIN_INPUT_PULLUP, 0)	/* (D28) MMC1_DAT0 */
-			AM65X_IOPAD(0x02cc, PIN_INPUT_PULLUP, 0)	/* (E27) MMC1_DAT1 */
-			AM65X_IOPAD(0x02c8, PIN_INPUT_PULLUP, 0)	/* (D26) MMC1_DAT2 */
-			AM65X_IOPAD(0x02c4, PIN_INPUT_PULLUP, 0)	/* (D27) MMC1_DAT3 */
-			AM65X_IOPAD(0x02dc, PIN_INPUT_PULLUP, 0)	/* (B24) MMC1_SDCD */
-			AM65X_IOPAD(0x02e0, PIN_INPUT, 0)		/* (C24) MMC1_SDWP */
-		>;
-		u-boot,dm-spl;
-	};
+	// main_mmc1_pins_default: main_mmc1_pins_default {
+	// 	pinctrl-single,pins = <
+	// 		AM65X_IOPAD(0x02d4, PIN_INPUT_PULLDOWN, 0)	/* (C27) MMC1_CLK */
+	// 		AM65X_IOPAD(0x02d8, PIN_INPUT_PULLUP, 0)	/* (C28) MMC1_CMD */
+	// 		AM65X_IOPAD(0x02d0, PIN_INPUT_PULLUP, 0)	/* (D28) MMC1_DAT0 */
+	// 		AM65X_IOPAD(0x02cc, PIN_INPUT_PULLUP, 0)	/* (E27) MMC1_DAT1 */
+	// 		AM65X_IOPAD(0x02c8, PIN_INPUT_PULLUP, 0)	/* (D26) MMC1_DAT2 */
+	// 		AM65X_IOPAD(0x02c4, PIN_INPUT_PULLUP, 0)	/* (D27) MMC1_DAT3 */
+	// 		AM65X_IOPAD(0x02dc, PIN_INPUT_PULLUP, 0)	/* (B24) MMC1_SDCD */
+	// 		AM65X_IOPAD(0x02e0, PIN_INPUT, 0)		/* (C24) MMC1_SDWP */
+	// 	>;
+	// 	u-boot,dm-spl;
+	// };
 };
 
 &memorycontroller {
@@ -231,6 +263,7 @@
 	pinctrl-0 = <&wkup_vtt_pins_default>;
 };
 
+/* eMMC */
 &sdhci0 {
 	clock-names = "clk_xin";
 	clocks = <&clk_200mhz>;
@@ -242,17 +275,18 @@
 &sdhci1 {
 	clock-names = "clk_xin";
 	clocks = <&clk_200mhz>;
-	pinctrl-0 = <&main_mmc1_pins_default>;
+	// pinctrl-0 = <&main_mmc1_pins_default>;
 	/delete-property/ power-domains;
 	ti,driver-strength-ohm = <50>;
 };
 
-&wkup_i2c0 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&wkup_i2c0_pins_default>;
-	clock-frequency = <400000>;
+&mcu_i2c0 {
 	u-boot,dm-spl;
-
+	pinctrl-names = "default";
+	pinctrl-0 = <&mcu_i2c0_pins_default>;
+	status = "okay";
+	clock-frequency = <400000>;
+	power-domains = <&k3_pds 114 TI_SCI_PD_SHARED>;
 	vdd_mpu: tps62363@60 {
 		compatible = "ti,tps62363";
 		reg = <0x60>;
@@ -267,13 +301,54 @@
 	};
 };
 
+&wkup_i2c0 {
+	// pinctrl-names = "default";
+	// pinctrl-0 = <&wkup_i2c0_pins_default>;
+	// clock-frequency = <400000>;
+	// u-boot,dm-spl;
+
+	// vdd_mpu: tps62363@60 {
+	// 	compatible = "ti,tps62363";
+	// 	reg = <0x60>;
+	// 	regulator-name = "VDD_MPU";
+	// 	regulator-min-microvolt = <500000>;
+	// 	regulator-max-microvolt = <1770000>;
+	// 	regulator-always-on;
+	// 	regulator-boot-on;
+	// 	ti,vsel0-state-high;
+	// 	ti,vsel1-state-high;
+	// 	u-boot,dm-spl;
+	// };
+	u-boot,dm-spl;
+	pinctrl-names = "default";
+	pinctrl-0 = <&wkup_i2c0_pins_default>;
+	status = "okay";
+	clock-frequency = <400000>;
+	power-domains = <&k3_pds 115 TI_SCI_PD_SHARED>;
+	lp8733: lp8733@60 {
+		compatible = "ti,lp8733";
+		reg = <0x60>;
+		u-boot,dm-spl;
+		lp8733_regulators: regulators {
+			u-boot,dm-spl;
+			lp8733_buck0_reg: buck0 {
+				regulator-name = "lp8733-buck0";
+				regulator-min-microvolt = <850000>;
+				regulator-max-microvolt = <1250000>;
+				regulator-always-on;
+				regulator-boot-on;
+				u-boot,dm-spl;
+			};
+		};
+	};
+};
+
 &ospi0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&mcu_fss0_ospi0_pins_default>;
 
 	reg = <0x0 0x47040000 0x0 0x100>,
 	      <0x0 0x50000000 0x0 0x8000000>;
-
 	u-boot,dm-spl;
 	flash@0{
 		compatible = "jedec,spi-nor";
@@ -288,43 +363,43 @@
 		cdns,read-delay = <0>;
 		#address-cells = <1>;
 		#size-cells = <1>;
-		u-boot,dm-spl;
+		u-boot,dm-spl;		
 	};
 };
 
-&main_pmx0 {
-	u-boot,dm-spl;
-	usb0_pins_default: usb0_pins_default {
-		pinctrl-single,pins = <
-			AM65X_IOPAD(0x02bc, PIN_OUTPUT, 0) /* (AD9) USB0_DRVVBUS */
-		>;
-		u-boot,dm-spl;
-	};
-};
+// &main_pmx0 {
+// 	u-boot,dm-spl;
+// 	usb0_pins_default: usb0_pins_default {
+// 		pinctrl-single,pins = <
+// 			AM65X_IOPAD(0x02bc, PIN_OUTPUT, 0) /* (AD9) USB0_DRVVBUS */
+// 		>;
+// 		u-boot,dm-spl;
+// 	};
+// };
 
-&dwc3_0 {
-	status = "okay";
-	u-boot,dm-spl;
-	/delete-property/ power-domains;
-	/delete-property/ assigned-clocks;
-	/delete-property/ assigned-clock-parents;
-};
+// &dwc3_0 {
+// 	status = "okay";
+// 	u-boot,dm-spl;
+// 	/delete-property/ power-domains;
+// 	/delete-property/ assigned-clocks;
+// 	/delete-property/ assigned-clock-parents;
+// };
 
-&usb0_phy {
-	status = "okay";
-	u-boot,dm-spl;
-	/delete-property/ clocks;
-};
+// &usb0_phy {
+// 	status = "okay";
+// 	u-boot,dm-spl;
+// 	/delete-property/ clocks;
+// };
 
-&usb0 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&usb0_pins_default>;
-	dr_mode = "peripheral";
-	u-boot,dm-spl;
-};
+// &usb0 {
+// 	pinctrl-names = "default";
+// 	pinctrl-0 = <&usb0_pins_default>;
+// 	dr_mode = "peripheral";
+// 	u-boot,dm-spl;
+// };
 
 &scm_conf {
 	u-boot,dm-spl;
 };
 
-#include "k3-am654-base-board-u-boot.dtsi"
+// #include "k3-am654-base-board-u-boot.dtsi"

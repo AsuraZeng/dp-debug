@@ -167,5 +167,30 @@ static int spl_spi_load_image(struct spl_image_info *spl_image,
 
 	return err;
 }
+
+int spl_spi_load(struct spl_image_info *spl_image,
+		 struct spl_boot_device *bootdev,
+		 unsigned int offs_override,
+		 void *buffer)
+{
+	int err = 0;
+	unsigned payload_offs = CONFIG_SYS_SPI_U_BOOT_OFFS;
+	static struct spi_flash *flash;
+	struct image_header *header;
+	// volatile int i=1;
+	// while(i)
+	// 	asm("nop");	
+	/* Perform peripheral init only once */
+	if (!flash) {
+		flash = spi_flash_probe(CONFIG_SF_DEFAULT_BUS,
+					CONFIG_SF_DEFAULT_CS,
+					CONFIG_SF_DEFAULT_SPEED,
+					CONFIG_SF_DEFAULT_MODE);
+		if (!flash) {
+			puts("SPI probe failed.\n");
+			return -ENODEV;
+		}
+	}
+}
 /* Use priorty 1 so that boards can override this */
 SPL_LOAD_IMAGE_METHOD("SPI", 1, BOOT_DEVICE_SPI, spl_spi_load_image);

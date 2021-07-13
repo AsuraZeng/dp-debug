@@ -343,14 +343,22 @@ int spi_get_bus_and_cs(int busnum, int cs, int speed, int mode,
 #if CONFIG_IS_ENABLED(OF_PLATDATA)
 	ret = uclass_first_device_err(UCLASS_SPI, &bus);
 #else
+	// volatile int j=1;
+	// while(j)
+	// 	asm("nop");
 	ret = uclass_get_device_by_seq(UCLASS_SPI, busnum, &bus);
 #endif
+	// volatile int j=1;
+	// while(j)
+	// 	asm("nop");
 	if (ret) {
+			volatile int j=1;
+		while(j)
+			asm("nop");
 		log_err("Invalid bus %d (err=%d)\n", busnum, ret);
 		return ret;
 	}
 	ret = spi_find_chip_select(bus, cs, &dev);
-
 	/*
 	 * If there is no such device, create one automatically. This means
 	 * that we don't need a device tree node or platform data for the

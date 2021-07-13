@@ -592,6 +592,21 @@ int spl_ymodem_load_image(struct spl_image_info *spl_image,
 			  struct spl_boot_device *bootdev);
 
 /**
+ * spl_mmc_load() - Load an image file from SPI flash
+ *
+ * @param spl_image	Image data filled in by loading process
+ * @param bootdev	Describes which device to load from
+ * @param offs_override	Start offset to read from
+ * @param buffer	Address to load image file to
+ *
+ * @return 0 on success, otherwise error code
+ */
+int spl_spi_load(struct spl_image_info *spl_image,
+		 struct spl_boot_device *bootdev,
+		 unsigned int offs_override,
+		 void *buffer);
+
+/**
  * spl_invoke_atf - boot using an ARM trusted firmware image
  */
 void spl_invoke_atf(struct spl_image_info *spl_image);

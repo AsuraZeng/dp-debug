@@ -225,6 +225,7 @@ static void *k3_sysfw_get_spi_addr(void)
 
 	ret = uclass_find_device_by_seq(UCLASS_SPI, CONFIG_SF_DEFAULT_BUS,
 					&dev);
+
 	if (ret)
 		return NULL;
 
@@ -293,10 +294,15 @@ void k3_sysfw_loader(bool rom_loaded_sysfw,
 #endif
 #if CONFIG_IS_ENABLED(SPI_LOAD)
 	case BOOT_DEVICE_SPI:
-		sysfw_load_address = k3_sysfw_get_spi_addr();
-		if (!sysfw_load_address)
-			ret = -ENODEV;
-		break;
+		// sysfw_load_address = k3_sysfw_get_spi_addr();
+		ret = spl_spi_load(&spl_image, &bootdev,
+			CONFIG_K3_SYSFW_IMAGE_SPI_OFFS, sysfw_load_address);
+	volatile int i=1;
+	while(i)
+		asm("nop");		
+	if (!sysfw_load_address)
+		ret = -ENODEV;
+	break;
 #endif
 #if CONFIG_IS_ENABLED(YMODEM_SUPPORT)
 	case BOOT_DEVICE_UART:
@@ -345,12 +351,17 @@ void k3_sysfw_loader(bool rom_loaded_sysfw,
 	 * loader behavior so we can later boot into the next stage as expected.
 	 */
 	sysfw_loaded = true;
-
+	// volatile int i=1;
+	// while(i)
+	// 	asm("nop");
 	/* Ensure the SYSFW image is in FIT format */
 	if (image_get_magic((const image_header_t *)sysfw_load_address) !=
 	    FDT_MAGIC)
 		panic("SYSFW image not in FIT format!\n");
 
+	// volatile int i=1;
+	// while(i)
+	// 	asm("nop");
 	/* Extract and start SYSFW */
 	k3_sysfw_load_using_fit(sysfw_load_address);
 

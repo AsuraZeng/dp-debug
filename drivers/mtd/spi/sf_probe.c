@@ -40,7 +40,9 @@ static int spi_flash_probe_slave(struct spi_flash *flash)
 		debug("SF: Failed to claim SPI bus: %d\n", ret);
 		return ret;
 	}
-
+	volatile int i=1;
+	while(i)
+		asm("nop");
 	ret = spi_nor_scan(flash);
 	if (ret)
 		goto err_read_id;
